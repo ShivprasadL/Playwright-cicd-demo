@@ -1,0 +1,14 @@
+{
+  "name": "playwright-cicd-demo",
+  "version": "1.0.0",
+  "description": "Sample Playwright TypeScript project for CI/CD practice",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
