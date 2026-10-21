@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     tools {
-        // Ensure you have a Node.js tool configured in Jenkins Global Tool Configuration
         nodejs 'NodeJS-26' 
     }
     triggers {
-        githubPush() // Listens for GitHub push events
+        // Changed to pollSCM since githubPush requires specific webhook configurations/plugins
+        pollSCM('H/5 * * * *') 
     }
 
     stages {
@@ -24,7 +24,6 @@ pipeline {
 
         stage('Install Playwright Browsers') {
             steps {
-                // On Windows, drop '--with-deps' because it is only for Linux system packages
                 bat 'npx playwright install'
             }
         }
@@ -38,22 +37,15 @@ pipeline {
 
     post {
         always {
-            // Publish Playwright HTML Report first so Jenkins can copy the files
+            // Fixed HTML publisher parameters (removed invalid stripArchive)
             publishHTML([
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: 'playwright-report',
                 reportFiles: 'index.html',
-                reportName: 'Playwright HTML Report',
-                stripArchive: true
+                reportName: 'Playwright HTML Report'
             ])
-        }
-        success {
-            // Optional: Do extra things on success
-        }
-        failure {
-            // Optional: Do extra things on failure
         }
     }
 }
