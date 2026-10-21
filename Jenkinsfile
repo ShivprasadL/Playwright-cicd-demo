@@ -5,6 +5,9 @@ pipeline {
         // Ensure you have a Node.js tool configured in Jenkins Global Tool Configuration
         nodejs 'NodeJS-26' 
     }
+    triggers {
+        githubPush() // Listens for GitHub push events
+    }
 
     stages {
         stage('Checkout') {
@@ -35,11 +38,22 @@ pipeline {
 
     post {
         always {
-            // Archive the HTML report so you can view it inside Jenkins
-            archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
+            // Publish Playwright HTML Report first so Jenkins can copy the files
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'playwright-report',
+                reportFiles: 'index.html',
+                reportName: 'Playwright HTML Report',
+                stripArchive: true
+            ])
         }
-        cleanup {
-            cleanWs()
+        success {
+            // Optional: Do extra things on success
+        }
+        failure {
+            // Optional: Do extra things on failure
         }
     }
 }
