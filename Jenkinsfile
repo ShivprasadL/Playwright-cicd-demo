@@ -15,20 +15,20 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci'
+                bat 'npm install'
             }
         }
 
         stage('Install Playwright Browsers') {
             steps {
-                // If running on Linux agent without pre-installed dependencies, use npx playwright install --with-deps
-                sh 'npx playwright install --with-deps'
+                // On Windows, drop '--with-deps' because it is only for Linux system packages
+                bat 'npx playwright install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npm test'
+                bat 'npx playwright test'
             }
         }
     }
