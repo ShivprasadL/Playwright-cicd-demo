@@ -14,13 +14,13 @@ jobs:
       with:
         node-version: lts/*
     - name: Install dependencies
-      run: ci
+      run: npm ci   # <--- Fixed: Added 'npm' here
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: npx playwright test
 
-      # 🚀 THIS IS THE NEW REPORTING STEP
+    # 🚀 THIS IS THE NEW REPORTING STEP
     - name: Upload Playwright HTML Report
       uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
