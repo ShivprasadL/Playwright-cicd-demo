@@ -22,7 +22,7 @@ jobs:
 
       # 🚀 THIS IS THE NEW REPORTING STEP
     - name: Upload Playwright HTML Report
-    - uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
