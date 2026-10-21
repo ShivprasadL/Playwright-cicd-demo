@@ -1,10 +1,13 @@
-Here is the fully updated and enhanced `README.md` file for your repository. It incorporates all the exact configurations, tools (`NodeJS-26`), polling triggers (`pollSCM`), and the crucial **Jenkins CSP troubleshooting fix** for rendering HTML reports that we worked through together.
+Here is the fully updated and corrected `README.md` file content. It now includes instructions on your GitHub Actions setup, the reporting badge, and all the correct configurations.
 
 ---
 
+```markdown
 # Playwright + TypeScript CI/CD Sample Project
 
-This repository serves as a sample framework for implementing and practicing CI/CD pipelines using **GitHub Actions** and **Jenkins**, running automated UI tests with **Playwright** and **TypeScript**.
+This repository serves as a sample framework for practicing and implementing CI/CD pipelines using **GitHub Actions** and **Jenkins**, running automated UI tests with **Playwright** and **TypeScript**.
+
+[![Playwright Tests](https://github.com/ShivprasadL/Playwright-cicd-demo/actions/workflows/playwright.yml/badge.svg)](https://github.com/ShivprasadL/Playwright-cicd-demo/actions/workflows/playwright.yml)
 
 ---
 
@@ -30,15 +33,14 @@ playwright-cicd-demo/
 
 ### Prerequisites
 
-* **Node.js** (v18, v20, or v26 as configured in your environment)
-* **npm** (comes packaged with Node.js)
-* **Git**
+* **Node.js** (LTS version recommended)
+* **npm** (comes with Node.js)
 
-### Installation & Execution Steps
+### Installation Steps
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/ShivprasadL/Playwright-cicd-demo.git
+git clone [https://github.com/ShivprasadL/Playwright-cicd-demo.git](https://github.com/ShivprasadL/Playwright-cicd-demo.git)
 cd Playwright-cicd-demo
 
 ```
@@ -46,14 +48,14 @@ cd Playwright-cicd-demo
 
 2. **Install project dependencies:**
 ```bash
-npm install
+npm ci
 
 ```
 
 
-3. **Install Playwright Browsers:** *(Note: Omit `--with-deps` if running on a Windows environment)*
+3. **Install Playwright Browsers (with system dependencies):**
 ```bash
-npx playwright install
+npx playwright install --with-deps
 
 ```
 
@@ -79,102 +81,48 @@ npx playwright show-report
 
 ### 1. GitHub Actions (`.github/workflows/playwright.yml`)
 
-* **Trigger:** Automatically runs on pushes and pull requests targeting the main branch.
-* **Steps Executed:** Checks out code, sets up Node.js, installs dependencies & browsers, runs test suite, and uploads test reports as artifacts.
+* **Trigger:** Automatically runs on every `push` or `pull_request` to the `main` or `master` branches.
+* **Steps Executed:**
+1. Checks out the code.
+2. Sets up Node.js (using `lts/*`).
+3. Installs dependencies (`npm ci`).
+4. Installs Playwright browsers and system dependencies (`npx playwright install --with-deps`).
+5. Executes the test suite (`npx playwright test`).
+6. **HTML Test Reporting:** Automatically packages and uploads the Playwright HTML report as a downloadable artifact (retained for 30 days) even if tests fail (`if: ${{ !cancelled() }}`).
+
+
 
 ### 2. Jenkins Pipeline (`Jenkinsfile`)
 
-Your final, optimized `Jenkinsfile` used for local Jenkins execution:
+* **Trigger:** Manual or SCM-polled builds via Jenkins.
+* **Pipeline Stages:**
+1. **Checkout:** Pulls source code from your Git repository.
+2. **Install Dependencies:** Runs `npm ci`.
+3. **Install Playwright Browsers:** Installs necessary browser binaries (`npx playwright install --with-deps`).
+4. **Run Tests:** Executes `npx playwright test`.
+5. **Post-Build Actions:** Archives the Playwright HTML report and cleans up the workspace.
 
-```groovy
-pipeline {
-    agent any
 
-    tools {
-        nodejs 'NodeJS-26' 
-    }
-    
-    triggers {
-        pollSCM('H/5 * * * *') // Automatically polls GitHub every 5 minutes for updates
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
-
-        stage('Install Playwright Browsers') {
-            steps {
-                bat 'npx playwright install'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                bat 'npx playwright test'
-            }
-        }
-    }
-
-    post {
-        always {
-            // Publishes the Playwright HTML report to the Jenkins UI dashboard
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'playwright-report',
-                reportFiles: 'index.html',
-                reportName: 'Playwright HTML Report'
-            ])
-        }
-    }
-}
-
-```
 
 ---
 
-## 🛠️ Setting Up and Configuring Jenkins
+## 🛠️ Setting Up Jenkins Job
 
-### Step 1: Create the Pipeline Job
+To run this pipeline in Jenkins:
 
-1. Go to your Jenkins Dashboard and click **New Item**.
-2. Enter a name (e.g., `Playwright-cicd-demo`) and select **Pipeline**, then click **OK**.
+1. Create a **New Item** in your Jenkins dashboard.
+2. Select **Pipeline** and give it a name (e.g., `playwright-demo`).
 3. Under the **Pipeline** section:
-* **Definition:** `Pipeline script from SCM`
-* **SCM:** `Git`
-* **Repository URL:** `[https://github.com/ShivprasadL/Playwright-cicd-demo](https://github.com/ShivprasadL/Playwright-cicd-demo)`
-* **Branch Specifier:** `*/main`
-* **Script Path:** `Jenkinsfile`
+* Set **Definition** to **Pipeline script from SCM**.
+* Set **SCM** to **Git**.
+* Enter your Repository URL: `https://github.com/ShivprasadL/Playwright-cicd-demo`.
+* Add **Credentials** (if your repository is private; leave as `- none -` if public).
+* Ensure the **Branches to build** matches your default branch (`*/main` or `*/master`).
+* Set the **Script Path** to `Jenkinsfile`.
 
 
-4. Click **Save**.
-
-### Step 2: Essential Plugins
-
-Make sure you have the **HTML Publisher plugin** installed via **Manage Jenkins $\rightarrow$ Plugins** so Jenkins can render and host your Playwright HTML test results.
-
-### 🔧 Troubleshooting: Fixing Blank HTML Reports in Jenkins
-
-By default, Jenkins implements a strict **Content Security Policy (CSP)** that blocks CSS and JavaScript inside HTML reports, causing published reports to look completely blank.
-
-**How to fix it instantly:**
-
-1. Navigate to your Jenkins Dashboard $\rightarrow$ **Manage Jenkins** $\rightarrow$ **Script Console**.
-2. Paste and run the following Groovy script:
-```groovy
-System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
+4. Click **Save** and select **Build Now**.
 
 ```
 
-
-3. Refresh your job build's **Playwright HTML Report** page, and all styles, logs, and interactive layouts will load correctly!
+```
