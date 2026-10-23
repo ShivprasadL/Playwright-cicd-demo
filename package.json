@@ -4,11 +4,15 @@
   "description": "Sample Playwright TypeScript project for CI/CD practice",
   "scripts": {
     "test": "playwright test",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "test:dev": "cross-env ENV=dev npx playwright test",
+    "test:example": "cross-env ENV=example npx playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0",
     "@types/node": "^20.11.24",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.9",
     "typescript": "^5.3.3"
   }
 }

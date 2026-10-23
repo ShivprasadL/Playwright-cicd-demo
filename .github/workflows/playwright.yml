@@ -4,6 +4,19 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
+# Allows you to trigger this workflow manually from the GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose environment to test against'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - example
+
 jobs:
   test:
     timeout-minutes: 60
@@ -18,7 +31,8 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      run: npx playwright test
+      # If triggered manually, uses the dropdown choice. If pushed/PR'd, defaults to 'dev'.
+      run: npx cross-env ENV=${{ github.event.inputs.environment || 'dev' }} npx playwright test
 
     # 🚀 THIS IS THE NEW REPORTING STEP
     - name: Upload Playwright HTML Report

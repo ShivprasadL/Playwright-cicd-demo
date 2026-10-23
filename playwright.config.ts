@@ -1,4 +1,15 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+const environment = process.env.ENV || 'dev';
+dotenv.config({ path: path.resolve(__dirname, `.env.${environment}`) });
+
+// Print it out to verify in the terminal!
+console.log(`>>> LOADING ENVIRONMENT: ${environment.toUpperCase()} with URL: ${process.env.BASE_URL}`);
+
+
+
 
 /**
  * Read environment variables from file.
@@ -29,6 +40,12 @@ reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }]],  use
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
+
+use: {
+    // 3. Automatically pick up baseURL from the loaded .env file
+    baseURL: process.env.BASE_URL,
+    trace: 'on-first-retry',
+  },  
 
   /* Configure projects for major browsers */
   projects: [

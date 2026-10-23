@@ -4,6 +4,15 @@ pipeline {
     tools {
         nodejs 'NodeJS-26' 
     }
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'example'],
+            description: 'Select the environment to run Playwright tests against'
+        )
+    }
+
     triggers {
         // Changed to pollSCM since githubPush requires specific webhook configurations/plugins
         pollSCM('H/5 * * * *') 
@@ -30,7 +39,8 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'npx playwright test'
+                // Uses the environment dropdown parameter selected in Jenkins UI
+                bat "npx cross-env ENV=${params.ENVIRONMENT} npx playwright test"
             }
         }
     }
